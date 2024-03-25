@@ -14,7 +14,9 @@ let package = Package(
     targets: [
         .target(
             name: "SCFNotification",
-            dependencies: []
+            dependencies: [],
+            path: "Sources",
+            resources: [.copy("Resources/PrivacyInfo.xcprivacy")]
         ),
         .testTarget(
             name: "SCFNotificationTests",
