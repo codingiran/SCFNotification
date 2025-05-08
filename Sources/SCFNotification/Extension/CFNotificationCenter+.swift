@@ -1,24 +1,24 @@
 //
 //  CFNotificationCenter+.swift
-//  
+//
 //
 //  Created by p-x9 on 2023/01/21.
-//  
+//
 //
 
 import Foundation
 
-extension CFNotificationCenter {
-    public static var local: CFNotificationCenter {
+public extension CFNotificationCenter {
+    static var local: CFNotificationCenter {
         CFNotificationCenterGetLocalCenter()
     }
 
-    public static var darwinNotify: CFNotificationCenter {
+    static var darwinNotify: CFNotificationCenter {
         CFNotificationCenterGetDarwinNotifyCenter()
     }
 
 #if os(macOS)
-    public static var distributed: CFNotificationCenter {
+    static var distributed: CFNotificationCenter {
         CFNotificationCenterGetDistributedCenter()
     }
 #endif

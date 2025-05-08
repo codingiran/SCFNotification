@@ -1,18 +1,19 @@
 //
 //  Array+.swift
-//  
+//
 //
 //  Created by p-x9 on 2023/01/21.
-//  
+//
 //
 
 import Foundation
 
 extension Array where Element == Observation {
-    func remove(observer: UnsafeMutableRawPointer?, name: CFNotificationName?, object: UnsafeRawPointer?) -> Array<Element> {
+    func remove(observer: UnsafeMutableRawPointer?, name: CFNotificationName?, object: UnsafeRawPointer?) -> [Element] {
         filter {
             guard $0.observerPtr == observer,
-                  $0.objectPtr == object else {
+                  $0.objectPtr == object
+            else {
                 return true
             }
 
@@ -24,7 +25,7 @@ extension Array where Element == Observation {
         }
     }
 
-    func removeEvery(observer: UnsafeMutableRawPointer?) -> Array<Element> {
+    func removeEvery(observer: UnsafeMutableRawPointer?) -> [Element] {
         filter {
             guard $0.observerPtr == observer else {
                 return true
@@ -33,13 +34,13 @@ extension Array where Element == Observation {
         }
     }
 
-    func cleanUpped() -> Array<Element> {
+    func cleanUpped() -> [Element] {
         filter {
             $0.observer != nil
         }
     }
 
-    func notifyNeededOnly(observer: UnsafeMutableRawPointer?, name: CFNotificationName?, object: UnsafeRawPointer?) -> Array<Element> {
+    func notifyNeededOnly(observer: UnsafeMutableRawPointer?, name: CFNotificationName?, object: UnsafeRawPointer?) -> [Element] {
         filter {
             var isFiltered = true
 

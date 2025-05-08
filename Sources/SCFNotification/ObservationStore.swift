@@ -1,9 +1,9 @@
 //
 //  ObservationStore.swift
-//  
+//
 //
 //  Created by p-x9 on 2023/01/21.
-//  
+//
 //
 
 import Foundation
@@ -38,7 +38,8 @@ class ObservationStore {
     func remove(center: SCFNotificationCenter.CenterType,
                 observer: UnsafeMutableRawPointer?,
                 name: CFNotificationName?,
-                object: UnsafeRawPointer?) {
+                object: UnsafeRawPointer?)
+    {
         cleanUp()
 
         switch center {
@@ -105,7 +106,6 @@ class ObservationStore {
                 $0.notify(center.cfNotificationCenter, observer, name, object, userInfo)
             }
     }
-
 }
 
 extension ObservationStore {

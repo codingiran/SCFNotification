@@ -1,5 +1,5 @@
-import XCTest
 @testable import SCFNotification
+import XCTest
 
 class SCFDistributedNotificationTests: SCFNotificationTests {
     override var centerType: SCFNotificationCenter.CenterType {
@@ -15,9 +15,10 @@ class SCFDistributedNotificationTests: SCFNotificationTests {
         notificationCenter
             .addObserver(observer: self,
                          name: nil,
-                         suspensionBehavior: .deliverImmediately) { center, observer, name, object, userInfo in
-                exp.fulfill()
-            }
+                         suspensionBehavior: .deliverImmediately)
+        { _, _, _, _, _ in
+            exp.fulfill()
+        }
 
         notificationCenter.postNotification(name: .init(#function as CFString),
                                             userInfo: [:] as CFDictionary,
