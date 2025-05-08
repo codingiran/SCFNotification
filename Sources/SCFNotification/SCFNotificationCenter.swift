@@ -1,12 +1,12 @@
 import Foundation
 
-public typealias SCFNotificationCallback<Observer: AnyObject, Object: AnyObject> = (_ center: CFNotificationCenter?,
-                                                                                    _ observer: Observer?,
-                                                                                    _ name: CFNotificationName?,
-                                                                                    _ object: Object?,
-                                                                                    _ userInfo: CFDictionary?) -> Void
+public typealias AnySendableObject = AnyObject & Sendable
 
-public class SCFNotificationCenter {
+public typealias SCFNotificationCallback<Observer: AnySendableObject, Object: AnySendableObject>
+    = @Sendable (_ center: CFNotificationCenter?, _ observer: Observer?, _ name: CFNotificationName?, _ object: Object?, _ userInfo: CFDictionary?) -> Void
+
+public class SCFNotificationCenter: @unchecked Sendable
+{
     public static let local: SCFNotificationCenter = .init(center: .local)
     public static let darwinNotify: SCFNotificationCenter = .init(center: .darwinNotify)
 
@@ -16,27 +16,23 @@ public class SCFNotificationCenter {
 
     private let center: CenterType
 
-    init(center: CenterType) {
+    init(center: CenterType)
+    {
         self.center = center
     }
 
-    public func addObserver<Observer: AnyObject>(observer: Observer,
-                                                 name: CFNotificationName?,
-                                                 object: AnyObject? = nil,
-                                                 suspensionBehavior: CFNotificationSuspensionBehavior,
-                                                 callback: @escaping SCFNotificationCallback<Observer, AnyObject>)
+    public func addObserver<Observer: AnySendableObject>(observer: Observer,
+                                                         name: CFNotificationName?,
+                                                         object: AnySendableObject? = nil,
+                                                         suspensionBehavior: CFNotificationSuspensionBehavior,
+                                                         callback: @escaping SCFNotificationCallback<Observer, AnySendableObject>)
     {
-        Self.addObserver(center: center,
-                         observer: observer,
-                         name: name,
-                         object: object,
-                         suspensionBehavior: suspensionBehavior,
-                         callback: callback)
+        Self.addObserver(center: center, observer: observer, name: name, object: object, suspensionBehavior: suspensionBehavior, callback: callback)
     }
 
-    public func removeObserver<Observer: AnyObject>(observer: Observer,
-                                                    name: CFNotificationName?,
-                                                    object: AnyObject? = nil)
+    public func removeObserver<Observer: AnySendableObject>(observer: Observer,
+                                                            name: CFNotificationName?,
+                                                            object: AnySendableObject? = nil)
     {
         Self.removeObserver(center: center,
                             observer: observer,
@@ -44,49 +40,41 @@ public class SCFNotificationCenter {
                             object: object)
     }
 
-    public func removeEveryObserver<Observer: AnyObject>(observer: Observer) {
+    public func removeEveryObserver<Observer: AnySendableObject>(observer: Observer)
+    {
         Self.removeEveryObserver(center: center, observer: observer)
     }
 
     public func postNotification(name: CFNotificationName,
-                                 object: AnyObject? = nil,
+                                 object: AnySendableObject? = nil,
                                  userInfo: CFDictionary,
                                  deliverImmediately: Bool)
     {
-        Self.postNotification(center: center,
-                              name: name,
-                              object: object,
-                              userInfo: userInfo,
-                              deliverImmediately: deliverImmediately)
+        Self.postNotification(center: center, name: name, object: object, userInfo: userInfo, deliverImmediately: deliverImmediately)
     }
 
     public func postNotification(name: CFNotificationName,
-                                 object: AnyObject? = nil,
+                                 object: AnySendableObject? = nil,
                                  userInfo: CFDictionary,
                                  options: Set<Option>)
     {
-        Self.postNotification(center: center,
-                              name: name,
-                              object: object,
-                              userInfo: userInfo,
-                              options: options)
+        Self.postNotification(center: center, name: name, object: object, userInfo: userInfo, options: options)
     }
 }
 
-public extension SCFNotificationCenter {
-    static func addObserver<Observer: AnyObject>(center: CenterType,
-                                                 observer: Observer,
-                                                 name: CFNotificationName?,
-                                                 object: AnyObject? = nil,
-                                                 suspensionBehavior: CFNotificationSuspensionBehavior,
-                                                 callback: @escaping SCFNotificationCallback<Observer, AnyObject>)
+public extension SCFNotificationCenter
+{
+    static func addObserver<Observer: AnySendableObject>(center: CenterType,
+                                                         observer: Observer,
+                                                         name: CFNotificationName?,
+                                                         object: AnySendableObject? = nil,
+                                                         suspensionBehavior: CFNotificationSuspensionBehavior,
+                                                         callback: @escaping SCFNotificationCallback<Observer, AnySendableObject>)
     {
-        var observation = Observation(name: name?.rawValue,
-                                      observer: observer,
-                                      object: object,
-                                      notify: callback)
+        var observation = Observation(name: name?.rawValue, observer: observer, object: object, notify: callback)
 
-        if center == .darwinNotify {
+        if center == .darwinNotify
+        {
             observation.object = nil
         }
 
@@ -94,28 +82,25 @@ public extension SCFNotificationCenter {
 
         CFNotificationCenterAddObserver(center.cfNotificationCenter, observation.observerPtr, { center, observer, name, object, userInfo in
             guard let center = center?.centerType else { return }
-            ObservationStore.shared.notifyIfNeeded(
-                center: center,
-                observer: observer,
-                name: name,
-                object: object,
-                userInfo: userInfo)
+            ObservationStore.shared.notifyIfNeeded(center: center, observer: observer, name: name, object: object, userInfo: userInfo)
         }, observation.name, observation.objectPtr, suspensionBehavior)
     }
 
-    static func removeObserver<Observer: AnyObject>(center: CenterType,
-                                                    observer: Observer,
-                                                    name: CFNotificationName?,
-                                                    object: AnyObject? = nil)
+    static func removeObserver<Observer: AnySendableObject>(center: CenterType,
+                                                            observer: Observer,
+                                                            name: CFNotificationName?,
+                                                            object: AnySendableObject? = nil)
     {
         let observer = unsafeBitCast(observer, to: UnsafeMutableRawPointer.self)
 
         var objectPtr: UnsafeRawPointer?
-        if let object {
+        if let object
+        {
             objectPtr = unsafeBitCast(object, to: UnsafeRawPointer.self)
         }
 
-        if center == .darwinNotify {
+        if center == .darwinNotify
+        {
             objectPtr = nil
         }
 
@@ -124,8 +109,8 @@ public extension SCFNotificationCenter {
         CFNotificationCenterRemoveObserver(center.cfNotificationCenter, observer, name, objectPtr)
     }
 
-    static func removeEveryObserver<Observer: AnyObject>(center: CenterType,
-                                                         observer: Observer)
+    static func removeEveryObserver<Observer: AnySendableObject>(center: CenterType,
+                                                                 observer: Observer)
     {
         let observer = unsafeBitCast(observer, to: UnsafeMutableRawPointer.self)
 
@@ -135,12 +120,13 @@ public extension SCFNotificationCenter {
 
     static func postNotification(center: CenterType,
                                  name: CFNotificationName,
-                                 object: AnyObject? = nil,
+                                 object: AnySendableObject? = nil,
                                  userInfo: CFDictionary,
                                  deliverImmediately: Bool)
     {
         var objectPtr: UnsafeRawPointer?
-        if let object {
+        if let object
+        {
             objectPtr = unsafeBitCast(object, to: UnsafeRawPointer.self)
         }
 
@@ -149,16 +135,18 @@ public extension SCFNotificationCenter {
 
     static func postNotification(center: CenterType,
                                  name: CFNotificationName,
-                                 object: AnyObject? = nil,
+                                 object: AnySendableObject? = nil,
                                  userInfo: CFDictionary,
                                  options: Set<Option>)
     {
         var objectPtr: UnsafeRawPointer?
-        if let object {
+        if let object
+        {
             objectPtr = unsafeBitCast(object, to: UnsafeRawPointer.self)
         }
 
-        let options: CFOptionFlags = options.reduce(into: 0) { partialResult, option in
+        let options: CFOptionFlags = options.reduce(into: 0)
+        { partialResult, option in
             partialResult = partialResult | option.flag
         }
 
@@ -166,16 +154,21 @@ public extension SCFNotificationCenter {
     }
 }
 
-public extension SCFNotificationCenter {
-    enum CenterType {
-        case local, darwinNotify
+public extension SCFNotificationCenter
+{
+    enum CenterType: Sendable
+    {
+        case local
+        case darwinNotify
 
 #if os(macOS)
         case distributed
 #endif
 
-        public var cfNotificationCenter: CFNotificationCenter {
-            switch self {
+        public var cfNotificationCenter: CFNotificationCenter
+        {
+            switch self
+            {
             case .local:
                 return CFNotificationCenterGetLocalCenter()
             case .darwinNotify:
@@ -189,13 +182,17 @@ public extension SCFNotificationCenter {
     }
 }
 
-public extension SCFNotificationCenter {
-    enum Option: CaseIterable {
+public extension SCFNotificationCenter
+{
+    enum Option: Sendable, CaseIterable
+    {
         case deliverImmediately
         case postToAllSessions
 
-        var flag: CFOptionFlags {
-            switch self {
+        var flag: CFOptionFlags
+        {
+            switch self
+            {
             case .deliverImmediately: return kCFNotificationDeliverImmediately
             case .postToAllSessions: return kCFNotificationPostToAllSessions
             }

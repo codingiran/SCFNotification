@@ -8,7 +8,7 @@
 
 import Foundation
 
-class ObservationStore {
+class ObservationStore: @unchecked Sendable {
     static let shared = ObservationStore()
 
     private(set) var localObservations = [Observation]()
@@ -44,15 +44,12 @@ class ObservationStore {
 
         switch center {
         case .local:
-            localObservations = localObservations
-                .remove(observer: observer, name: name, object: object)
+            localObservations = localObservations.remove(observer: observer, name: name, object: object)
         case .darwinNotify:
-            darwinNotifyObservations = darwinNotifyObservations
-                .remove(observer: observer, name: name, object: object)
+            darwinNotifyObservations = darwinNotifyObservations.remove(observer: observer, name: name, object: object)
 #if os(macOS)
         case .distributed:
-            distributedObservations = distributedObservations
-                .remove(observer: observer, name: name, object: object)
+            distributedObservations = distributedObservations.remove(observer: observer, name: name, object: object)
 #endif
         }
     }
@@ -62,15 +59,12 @@ class ObservationStore {
 
         switch center {
         case .local:
-            localObservations = localObservations
-                .removeEvery(observer: observer)
+            localObservations = localObservations.removeEvery(observer: observer)
         case .darwinNotify:
-            darwinNotifyObservations = darwinNotifyObservations
-                .removeEvery(observer: observer)
+            darwinNotifyObservations = darwinNotifyObservations.removeEvery(observer: observer)
 #if os(macOS)
         case .distributed:
-            distributedObservations = distributedObservations
-                .removeEvery(observer: observer)
+            distributedObservations = distributedObservations.removeEvery(observer: observer)
 #endif
         }
     }
@@ -100,11 +94,9 @@ class ObservationStore {
 #endif
         }
 
-        observations
-            .notifyNeededOnly(observer: observer, name: name, object: object)
-            .forEach {
-                $0.notify(center.cfNotificationCenter, observer, name, object, userInfo)
-            }
+        for item in observations.notifyNeededOnly(observer: observer, name: name, object: object) {
+            item.notify(center.cfNotificationCenter, observer, name, object, userInfo)
+        }
     }
 }
 

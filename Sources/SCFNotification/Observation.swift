@@ -8,8 +8,8 @@
 
 import Foundation
 
-struct Observation {
-    typealias SCFNotificationCallbackObjC = (CFNotificationCenter?, UnsafeMutableRawPointer?, CFNotificationName?, UnsafeRawPointer?, CFDictionary?) -> Void
+struct Observation: @unchecked Sendable {
+    typealias SCFNotificationCallbackObjC = @Sendable (CFNotificationCenter?, UnsafeMutableRawPointer?, CFNotificationName?, UnsafeRawPointer?, CFDictionary?) -> Void
 
     let name: CFString?
     var notificationName: CFNotificationName? {
@@ -19,8 +19,8 @@ struct Observation {
         return .init(name)
     }
 
-    weak var observer: AnyObject?
-    weak var object: AnyObject?
+    weak var observer: AnySendableObject?
+    weak var object: AnySendableObject?
 
     var observerPtr: UnsafeMutableRawPointer? {
         guard let observer = observer else {
@@ -38,10 +38,10 @@ struct Observation {
 
     let notify: SCFNotificationCallbackObjC
 
-    init<Observer: AnyObject, Object: AnyObject>(name: CFString?, observer: Observer, object: Object?, notify: SCFNotificationCallback<Observer, Object>?) {
+    init<Observer: AnySendableObject, Object: AnySendableObject>(name: CFString?, observer: Observer, object: Object?, notify: SCFNotificationCallback<Observer, Object>?) {
         self.name = name
-        self.observer = observer as AnyObject?
-        self.object = object as AnyObject?
+        self.observer = observer as AnySendableObject?
+        self.object = object as AnySendableObject?
 
         self.notify = { center, observerPtr, name, objectPtr, userInfo in
             var observer: Observer?
