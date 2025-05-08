@@ -1,7 +1,7 @@
 @testable import SCFNotification
 import XCTest
 
-class SCFDistributedNotificationTests: SCFNotificationTests {
+class SCFDistributedNotificationTests: SCFNotificationTests, @unchecked Sendable {
     override var centerType: SCFNotificationCenter.CenterType {
         .distributed
     }
@@ -20,12 +20,37 @@ class SCFDistributedNotificationTests: SCFNotificationTests {
             exp.fulfill()
         }
 
-        notificationCenter.postNotification(name: .init(#function as CFString),
-                                            userInfo: [:] as CFDictionary,
+        notificationCenter.postNotification(name: #function,
+                                            userInfo: [:],
                                             deliverImmediately: true)
 
         wait(for: [exp], timeout: timeout)
 
+        removeEveryObserver()
+    }
+
+    func testObserveNamedWithUserInfo() {
+        let exp = expectation(description: #function)
+        let key = "key"
+        let value = "hello"
+
+        notificationCenter
+            .addObserver(observer: self,
+                         name: #function,
+                         suspensionBehavior: .deliverImmediately)
+        { center, observer, name, _, userInfo in
+            XCTAssertEqual(observer, self)
+            XCTAssertEqual(center?.centerType, self.centerType)
+            XCTAssertEqual(name, #function)
+            XCTAssertEqual(value, userInfo?[key] as? String)
+            exp.fulfill()
+        }
+
+        notificationCenter.postNotification(name: #function,
+                                            userInfo: [key: value],
+                                            deliverImmediately: true)
+
+        wait(for: [exp], timeout: timeout)
         removeEveryObserver()
     }
 }

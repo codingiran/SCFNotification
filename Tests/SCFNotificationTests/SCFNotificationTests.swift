@@ -6,7 +6,7 @@ import XCTest
 /// 　Perhaps each time one test method is called, Xcode makes a copy and continues with the rest of the tests.
 /// 　Therefore, each time one method is called, we call the `removeEveryObserver` method at the end of it.
 
-class SCFNotificationTests: XCTestCase {
+class SCFNotificationTests: XCTestCase, @unchecked Sendable {
     var centerType: SCFNotificationCenter.CenterType { .local }
     lazy var notificationCenter: SCFNotificationCenter = .init(center: centerType)
     var observationStore: ObservationStore = .shared
@@ -33,17 +33,17 @@ class SCFNotificationTests: XCTestCase {
 
         notificationCenter
             .addObserver(observer: self,
-                         name: .init(#function as CFString),
+                         name: #function,
                          suspensionBehavior: .deliverImmediately)
         { center, observer, name, _, _ in
             XCTAssertEqual(observer, self)
             XCTAssertEqual(center?.centerType, self.centerType)
-            XCTAssertEqual(name?.rawValue, #function as CFString)
+            XCTAssertEqual(name, #function)
             exp.fulfill()
         }
 
-        notificationCenter.postNotification(name: .init(#function as CFString),
-                                            userInfo: [:] as CFDictionary,
+        notificationCenter.postNotification(name: #function,
+                                            userInfo: [:],
                                             deliverImmediately: true)
 
         wait(for: [exp], timeout: timeout)
@@ -57,14 +57,14 @@ class SCFNotificationTests: XCTestCase {
 
         notificationCenter
             .addObserver(observer: self,
-                         name: .init("\(#function)-aaa" as CFString),
+                         name: "\(#function)-aaa",
                          suspensionBehavior: .deliverImmediately)
         { _, _, _, _, _ in
             exp.fulfill()
         }
 
-        notificationCenter.postNotification(name: .init(#function as CFString),
-                                            userInfo: [:] as CFDictionary,
+        notificationCenter.postNotification(name: #function,
+                                            userInfo: [:],
                                             deliverImmediately: true)
 
         wait(for: [exp], timeout: timeout)
@@ -77,20 +77,20 @@ class SCFNotificationTests: XCTestCase {
 
         notificationCenter
             .addObserver(observer: self,
-                         name: .init(#function as CFString),
+                         name: #function,
                          object: "hello" as CFString,
                          suspensionBehavior: .deliverImmediately)
         { center, observer, name, object, _ in
             XCTAssertEqual(observer, self)
             XCTAssertEqual(center?.centerType, self.centerType)
-            XCTAssertEqual(name?.rawValue, #function as CFString)
+            XCTAssertEqual(name, #function)
             XCTAssertEqual(object as! CFString, "hello" as CFString)
             exp.fulfill()
         }
 
-        notificationCenter.postNotification(name: .init(#function as CFString),
+        notificationCenter.postNotification(name: #function,
                                             object: "hello" as CFString,
-                                            userInfo: [:] as CFDictionary,
+                                            userInfo: [:],
                                             deliverImmediately: true)
 
         wait(for: [exp], timeout: timeout)
@@ -103,16 +103,16 @@ class SCFNotificationTests: XCTestCase {
 
         notificationCenter
             .addObserver(observer: self,
-                         name: .init("\(#function)" as CFString),
+                         name: #function,
                          object: "hello-aaa" as CFString,
                          suspensionBehavior: .deliverImmediately)
         { _, _, _, _, _ in
             exp.fulfill()
         }
 
-        notificationCenter.postNotification(name: .init(#function as CFString),
+        notificationCenter.postNotification(name: #function,
                                             object: "hello" as CFString,
-                                            userInfo: [:] as CFDictionary,
+                                            userInfo: [:],
                                             deliverImmediately: true)
 
         wait(for: [exp], timeout: timeout)
@@ -130,12 +130,12 @@ class SCFNotificationTests: XCTestCase {
         { center, observer, name, _, _ in
             XCTAssertEqual(observer, self)
             XCTAssertEqual(center?.centerType, self.centerType)
-            XCTAssertEqual(name?.rawValue, #function as CFString)
+            XCTAssertEqual(name, #function)
             exp.fulfill()
         }
 
-        notificationCenter.postNotification(name: .init(#function as CFString),
-                                            userInfo: [:] as CFDictionary,
+        notificationCenter.postNotification(name: #function,
+                                            userInfo: [:],
                                             deliverImmediately: true)
 
         wait(for: [exp], timeout: timeout)
@@ -154,14 +154,14 @@ class SCFNotificationTests: XCTestCase {
         { center, observer, name, object, _ in
             XCTAssertEqual(observer, self)
             XCTAssertEqual(center?.centerType, self.centerType)
-            XCTAssertEqual(name?.rawValue, #function as CFString)
+            XCTAssertEqual(name, #function)
             XCTAssertEqual(object as! CFString, "hello" as CFString)
             exp.fulfill()
         }
 
-        notificationCenter.postNotification(name: .init(#function as CFString),
+        notificationCenter.postNotification(name: #function,
                                             object: "hello" as CFString,
-                                            userInfo: [:] as CFDictionary,
+                                            userInfo: [:],
                                             deliverImmediately: true)
 
         wait(for: [exp], timeout: timeout)
@@ -182,9 +182,9 @@ class SCFNotificationTests: XCTestCase {
             exp.fulfill()
         }
 
-        notificationCenter.postNotification(name: .init(#function as CFString),
+        notificationCenter.postNotification(name: #function,
                                             object: "hello" as CFString,
-                                            userInfo: [:] as CFDictionary,
+                                            userInfo: [:],
                                             deliverImmediately: true)
 
         wait(for: [exp], timeout: timeout)

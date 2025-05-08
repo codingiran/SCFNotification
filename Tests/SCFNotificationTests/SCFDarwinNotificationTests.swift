@@ -1,7 +1,7 @@
 @testable import SCFNotification
-import XCTest
+@preconcurrency import XCTest
 
-class SCFDarwinNotificationTests: SCFNotificationTests {
+class SCFDarwinNotificationTests: SCFNotificationTests, @unchecked Sendable {
     override var centerType: SCFNotificationCenter.CenterType {
         .darwinNotify
     }
@@ -13,20 +13,20 @@ class SCFDarwinNotificationTests: SCFNotificationTests {
 
         notificationCenter
             .addObserver(observer: self,
-                         name: .init(#function as CFString),
+                         name: #function,
                          object: "hello" as CFString,
                          suspensionBehavior: .deliverImmediately)
         { center, observer, name, object, _ in
             XCTAssertEqual(observer, self)
             XCTAssertEqual(center?.centerType, self.centerType)
-            XCTAssertEqual(name?.rawValue, #function as CFString)
+            XCTAssertEqual(name, #function)
             XCTAssertNil(object)
             exp.fulfill()
         }
 
-        notificationCenter.postNotification(name: .init(#function as CFString),
+        notificationCenter.postNotification(name: #function,
                                             object: "hello" as CFString,
-                                            userInfo: [:] as CFDictionary,
+                                            userInfo: [:],
                                             deliverImmediately: true)
 
         wait(for: [exp], timeout: timeout)
@@ -38,16 +38,16 @@ class SCFDarwinNotificationTests: SCFNotificationTests {
 
         notificationCenter
             .addObserver(observer: self,
-                         name: .init("\(#function)" as CFString),
+                         name: #function,
                          object: "hello-aaa" as CFString,
                          suspensionBehavior: .deliverImmediately)
         { _, _, _, _, _ in
             exp.fulfill()
         }
 
-        notificationCenter.postNotification(name: .init(#function as CFString),
+        notificationCenter.postNotification(name: #function,
                                             object: "hello" as CFString,
-                                            userInfo: [:] as CFDictionary,
+                                            userInfo: [:],
                                             deliverImmediately: true)
 
         wait(for: [exp], timeout: timeout)
@@ -69,8 +69,8 @@ class SCFDarwinNotificationTests: SCFNotificationTests {
             exp.fulfill()
         }
 
-        notificationCenter.postNotification(name: .init(#function as CFString),
-                                            userInfo: [:] as CFDictionary,
+        notificationCenter.postNotification(name: #function,
+                                            userInfo: [:],
                                             deliverImmediately: true)
 
         wait(for: [exp], timeout: timeout)
@@ -93,9 +93,9 @@ class SCFDarwinNotificationTests: SCFNotificationTests {
             exp.fulfill()
         }
 
-        notificationCenter.postNotification(name: .init(#function as CFString),
+        notificationCenter.postNotification(name: #function,
                                             object: "hello" as CFString,
-                                            userInfo: [:] as CFDictionary,
+                                            userInfo: [:],
                                             deliverImmediately: true)
 
         wait(for: [exp], timeout: timeout)

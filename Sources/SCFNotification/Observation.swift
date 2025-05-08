@@ -19,8 +19,8 @@ struct Observation: @unchecked Sendable {
         return .init(name)
     }
 
-    weak var observer: AnySendableObject?
-    weak var object: AnySendableObject?
+    weak var observer: SCFNotificationObserver?
+    weak var object: SCFNotificationObject?
 
     var observerPtr: UnsafeMutableRawPointer? {
         guard let observer = observer else {
@@ -38,10 +38,10 @@ struct Observation: @unchecked Sendable {
 
     let notify: SCFNotificationCallbackObjC
 
-    init<Observer: AnySendableObject, Object: AnySendableObject>(name: CFString?, observer: Observer, object: Object?, notify: SCFNotificationCallback<Observer, Object>?) {
+    init<Observer: SCFNotificationObserver, Object: SCFNotificationObject>(name: CFString?, observer: Observer, object: Object?, notify: SCFNotificationCallback<Observer, Object>?) {
         self.name = name
-        self.observer = observer as AnySendableObject?
-        self.object = object as AnySendableObject?
+        self.observer = observer
+        self.object = object
 
         self.notify = { center, observerPtr, name, objectPtr, userInfo in
             var observer: Observer?
@@ -52,7 +52,7 @@ struct Observation: @unchecked Sendable {
             if let objectPtr, center?.centerType != .darwinNotify {
                 object = unsafeBitCast(objectPtr, to: Object?.self)
             }
-            notify?(center, observer, name, object, userInfo)
+            notify?(center, observer, name?.scfNotificationName, object, userInfo?.scfNotificationUserInfo)
         }
     }
 }
