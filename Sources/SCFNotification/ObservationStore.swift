@@ -35,11 +35,7 @@ class ObservationStore: @unchecked Sendable {
         }
     }
 
-    func remove(center: SCFNotificationCenter.CenterType,
-                observer: UnsafeMutableRawPointer?,
-                name: CFNotificationName?,
-                object: UnsafeRawPointer?)
-    {
+    func remove(center: SCFNotificationCenter.CenterType, observer: UnsafeMutableRawPointer?, name: CFNotificationName?, object: UnsafeRawPointer?) {
         cleanUp()
 
         switch center {

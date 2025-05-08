@@ -1,5 +1,10 @@
 import Foundation
 
+// Enforce minimum Swift version for all platforms and build systems.
+#if swift(<5.9)
+#error("SCFNotification doesn't support Swift versions below 5.9.")
+#endif
+
 public typealias AnySendableObject = AnyObject & Sendable
 
 public typealias SCFNotificationCallback<Observer: AnySendableObject, Object: AnySendableObject>
